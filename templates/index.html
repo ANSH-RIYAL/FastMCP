@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastMCP Supply Chain Optimizer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(86, 171, 47, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 65, 108, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .panel h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .terminal {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .actions-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .action-item {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .action-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .timestamp {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .action-text {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #28a745;
+        }
+        
+        .status-offline {
+            background: #dc3545;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 FastMCP Supply Chain Optimizer</h1>
+            <p>Real-time supply chain optimization using FastMCP and Gemini AI</p>
+        </div>
+        
+        <div class="controls">
+            <div class="button-group">
+                <button id="startServerBtn" class="btn btn-primary">
+                    <span class="status-indicator status-offline"></span>
+                    Start FastMCP Server
+                </button>
+                <button id="stopServerBtn" class="btn btn-danger" disabled>
+                    Stop FastMCP Server
+                </button>
+                <button id="startStreamBtn" class="btn btn-success" disabled>
+                    Start Event Stream
+                </button>
+                <button id="stopStreamBtn" class="btn btn-danger" disabled>
+                    Stop Event Stream
+                </button>
+            </div>
+            
+            <div class="status">
+                <div id="statusText">Server: <span class="status-indicator status-offline"></span>Offline | Event Stream: <span class="status-indicator status-offline"></span>Stopped</div>
+                <div id="eventProgress">Events: 0/0 processed</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="panel">
+                <h3>📟 FastMCP Terminal Output</h3>
+                <div id="terminal" class="terminal">
+                    <div style="color: #888;">Waiting for server to start...</div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>🎯 FastMCP Client Recommended Actions</h3>
+                <div id="actionsLog" class="actions-log">
+                    <div style="color: #666; text-align: center; margin-top: 50px;">
+                        No actions yet. Start the server and event stream to see recommendations.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let statusUpdateInterval;
+        
+        // DOM elements
+        const startServerBtn = document.getElementById('startServerBtn');
+        const stopServerBtn = document.getElementById('stopServerBtn');
+        const startStreamBtn = document.getElementById('startStreamBtn');
+        const stopStreamBtn = document.getElementById('stopStreamBtn');
+        const terminal = document.getElementById('terminal');
+        const actionsLog = document.getElementById('actionsLog');
+        const statusText = document.getElementById('statusText');
+        const eventProgress = document.getElementById('eventProgress');
+        
+        // Add log to terminal
+        function addTerminalLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#00ff00',
+                'error': '#ff4444',
+                'warning': '#ffaa00',
+                'success': '#00ff88'
+            };
+            
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span style="color: #888;">[${timestamp}]</span> <span style="color: ${colors[type]};">${message}</span>`;
+            terminal.appendChild(logEntry);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Add action to log
+        function addActionLog(action) {
+            const timestamp = new Date().toLocaleTimeString();
+            const actionItem = document.createElement('div');
+            actionItem.className = 'action-item';
+            actionItem.innerHTML = `
+                <div class="timestamp">${timestamp}</div>
+                <div class="action-text">${action}</div>
+            `;
+            actionsLog.appendChild(actionItem);
+            actionsLog.scrollTop = actionsLog.scrollHeight;
+        }
+        
+        // Update status
+        function updateStatus(data) {
+            const serverStatus = data.server_running ? 'Online' : 'Offline';
+            const streamStatus = data.event_stream_running ? 'Running' : 'Stopped';
+            
+            statusText.innerHTML = `Server: <span class="status-indicator status-${data.server_running ? 'online' : 'offline'}"></span>${serverStatus} | Event Stream: <span class="status-indicator status-${data.event_stream_running ? 'online' : 'offline'}"></span>${streamStatus}`;
+            eventProgress.textContent = `Events: ${data.current_event_index}/${data.total_events} processed`;
+            
+            // Update button states
+            startServerBtn.disabled = data.server_running;
+            stopServerBtn.disabled = !data.server_running;
+            startStreamBtn.disabled = !data.server_running || data.event_stream_running;
+            stopStreamBtn.disabled = !data.event_stream_running;
+            
+            // Update button indicators
+            startServerBtn.querySelector('.status-indicator').className = `status-indicator status-${data.server_running ? 'online' : 'offline'}`;
+            
+            // Update actions log
+            if (data.actions_log && data.actions_log.length > 0) {
+                actionsLog.innerHTML = '';
+                data.actions_log.forEach(action => addActionLog(action));
+            }
+        }
+        
+        // Poll status
+        function pollStatus() {
+            fetch('/api/get_status')
+                .then(response => response.json())
+                .then(data => updateStatus(data))
+                .catch(error => console.error('Error polling status:', error));
+        }
+        
+        // Start status polling
+        function startStatusPolling() {
+            statusUpdateInterval = setInterval(pollStatus, 1000);
+        }
+        
+        // Stop status polling
+        function stopStatusPolling() {
+            if (statusUpdateInterval) {
+                clearInterval(statusUpdateInterval);
+            }
+        }
+        
+        // Event listeners
+        startServerBtn.addEventListener('click', async () => {
+            addTerminalLog('Starting FastMCP Server...', 'info');
+            startServerBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/start_server', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    addTerminalLog('✅ FastMCP Server started successfully!', 'success');
+                    addTerminalLog('📊 Loading inventory data...', 'info');
+                    addTerminalLog('🔧 Tools registered: get_inventory_status, update_inventory, calculate_transfer, predict_stockout, recommend_reorder', 'info');
+                } else {
+                    addTerminalLog(`❌ Failed to start server: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addTerminalLog(`❌ Error: ${error.message}`, 'error');
+            }
+        });
+        
+        stopServerBtn.addEventListener('click', async () => {
+            addTerminalLog('Stopping FastMCP Server...', 'warning');
+            
+            try {
+                const response = await fetch('/api/stop_server', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    addTerminalLog('✅ FastMCP Server stopped successfully!', 'success');
+                    addTerminalLog('💾 Inventory changes saved to file', 'info');
+                } else {
+                    addTerminalLog(`❌ Failed to stop server: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addTerminalLog(`❌ Error: ${error.message}`, 'error');
+            }
+        });
+        
+        startStreamBtn.addEventListener('click', async () => {
+            addTerminalLog('Starting Event Stream...', 'info');
+            addTerminalLog('📡 Reading events from data/events.csv', 'info');
+            
+            try {
+                const response = await fetch('/api/start_event_stream', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    addTerminalLog('✅ Event stream started!', 'success');
+                    addTerminalLog('🤖 FastMCP Agent is now processing events...', 'info');
+                } else {
+                    addTerminalLog(`❌ Failed to start event stream: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addTerminalLog(`❌ Error: ${error.message}`, 'error');
+            }
+        });
+        
+        stopStreamBtn.addEventListener('click', async () => {
+            addTerminalLog('Stopping Event Stream...', 'warning');
+            
+            try {
+                const response = await fetch('/api/stop_event_stream', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    addTerminalLog('✅ Event stream stopped!', 'success');
+                } else {
+                    addTerminalLog(`❌ Failed to stop event stream: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                addTerminalLog(`❌ Error: ${error.message}`, 'error');
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            addTerminalLog('🌐 FastMCP Supply Chain Optimizer initialized', 'info');
+            addTerminalLog('📋 Ready to start server and process events', 'info');
+            startStatusPolling();
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopStatusPolling();
+        });
+    </script>
+</body>
+</html> 

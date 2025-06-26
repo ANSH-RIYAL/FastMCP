@@ -1,0 +1,6 @@
+product_id,product_name,warehouse_A,warehouse_B,warehouse_C,cost_per_unit,supplier
+P001,Widget A,120,130,75,5.5,Supplier X
+P002,Widget B,200,120,130,3.2,Supplier Y
+P003,Widget C,80,90,110,7.8,Supplier Z
+P004,Widget D,300,250,200,2.5,Supplier X
+P005,Widget E,120,180,160,4.2,Supplier Y 
