@@ -19,7 +19,7 @@ A **custom implementation** of **FastMCP** (Model Context Protocol) for real-tim
 - **FastMCP**: Multiple tools called at every step of LLM processing
 - **This Implementation**: Simulates FastMCP's approach with multiple tool execution per event
 
-> *"FastMCP isn't open source, so I built a minimal simulation of a low-latency multi-tool orchestration stack inspired by it — showcasing how an LLM agent can respond to real-time supply chain updates with actionable suggestions via routed tools."*
+FastMCP isn't open source, so I built a minimal simulation of a low-latency multi-tool orchestration stack inspired by it — showcasing how an LLM agent can respond to real-time supply chain updates with actionable suggestions via routed tools.
 
 ## 🚀 Quick Start
 
